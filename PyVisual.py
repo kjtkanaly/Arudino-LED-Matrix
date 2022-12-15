@@ -4,10 +4,11 @@ from matplotlib import pyplot as plt
 
 def main():
     img = cv2.imread("TestImage.png")
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     imgData = np.asarray(img)
 
-    downSampleRate = 10
+    downSampleRate = 20
     downImgData = np.zeros((round(imgData.shape[0] / downSampleRate),
                            round(imgData.shape[1] / downSampleRate),
                            3))
@@ -17,6 +18,7 @@ def main():
 
     for row in range(0,img.shape[0],downSampleRate):
         for col in range(0,img.shape[1],downSampleRate):
+
             avgRedValue = np.mean(imgData[row:row + downSampleRate,
                                           col:col + downSampleRate, 0])
             avgGreenValue = np.mean(imgData[row:row + downSampleRate,
