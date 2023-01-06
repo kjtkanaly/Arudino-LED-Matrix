@@ -1,4 +1,6 @@
 import numpy as np
+import struct
+import serial
 
 # ----------------------------------------------------------------------------
 def seedTheBoard(board):
@@ -46,15 +48,19 @@ def main():
     numbOfRows = 5
     numbOfCols = 5
     timeDelay = 1
+    gameLoopCount = 0
 
     board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2))
 
     seedTheBoard(board)
 
-    for i in range(1, 4):
+    for i in range(1, gameLoopCount + 1):
         board = iterateGenerations(board, timeDelay)
         print(board)
 
+    for i in range(1, 128):
+        byte = struct.pack("b", i)
+        print(str(i) + ": " + str(byte))
     
 
 if __name__ == "__main__":
