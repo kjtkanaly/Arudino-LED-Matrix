@@ -13,8 +13,6 @@ def seedTheBoard(board):
     board[3][3] = 1
     board[3][4] = 1
 
-    print(board)
-
 # ----------------------------------------------------------------------------
 def iterateGenerations(board, timeDelay):
     
@@ -56,6 +54,25 @@ def convertByteToBinary(hex, base):
     return binary
 
 # ----------------------------------------------------------------------------
+def testByteFxs():
+    for i in range(0, 128):
+        byte = convertIntToByte(i, "b")
+        binary = convertByteToBinary(hex=byte.hex(), base=16)
+
+        print(str(i).zfill(3) + ": " + 
+              str(byte.hex()) + ", " + 
+              binary[2:].zfill(7))
+
+# ----------------------------------------------------------------------------
+def transmitNewBoard(board):
+     for row in range(1, np.shape(board)[0] - 1):
+        for col in range(1, np.shape(board)[1] - 1):
+            byte = convertIntToByte(val=int(board[row, col]), base="b")
+            binary = convertByteToBinary(hex=byte.hex(), base=16)
+
+            print(str(board[row,col]) + ": " + str(byte))
+
+# ----------------------------------------------------------------------------
 def main():
     numbOfRows = 5
     numbOfCols = 5
@@ -65,18 +82,18 @@ def main():
     board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2))
 
     seedTheBoard(board)
+    print(board)
+
+    transmitNewBoard(board)
 
     for i in range(1, gameLoopCount + 1):
         board = iterateGenerations(board, timeDelay)
         print(board)
 
-    for i in range(0, 128):
-        byte = convertIntToByte(i, "b")
-        binary = convertByteToBinary(hex=byte.hex(), base=16)
-
-        print(str(i).zfill(3) + ": " + str(byte.hex()) + ", " + binary[2:].zfill(7))
+        transmitNewBoard(board)
         
 
+# ----------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
 
