@@ -1,3 +1,5 @@
+from bitstring import BitArray
+
 import numpy as np
 import struct
 import serial
@@ -44,6 +46,16 @@ def iterateGenerations(board, timeDelay):
     return nextBoard
 
 # ----------------------------------------------------------------------------
+def convertIntToByte(val, base):
+    byte = struct.pack(base, val)
+    return byte
+
+# ----------------------------------------------------------------------------
+def convertByteToBinary(hex, base):
+    binary = bin(int(hex, base))
+    return binary
+
+# ----------------------------------------------------------------------------
 def main():
     numbOfRows = 5
     numbOfCols = 5
@@ -58,10 +70,12 @@ def main():
         board = iterateGenerations(board, timeDelay)
         print(board)
 
-    for i in range(1, 128):
-        byte = struct.pack("b", i)
-        print(str(i) + ": " + str(byte))
-    
+    for i in range(0, 128):
+        byte = convertIntToByte(i, "b")
+        binary = convertByteToBinary(hex=byte.hex(), base=16)
+
+        print(str(i).zfill(3) + ": " + str(byte.hex()) + ", " + binary[2:].zfill(7))
+        
 
 if __name__ == "__main__":
     main()
