@@ -1,8 +1,17 @@
-from bitstring import BitArray
+from serial.tools.list_ports import comports
 
 import numpy as np
 import struct
 import serial
+
+# ----------------------------------------------------------------------------
+def initiateBoard(numbOfRows, numbOfCols, seedBoard):
+    board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2))
+
+    if seedBoard:
+        board = seedTheBoard(board)
+
+    return board
 
 # ----------------------------------------------------------------------------
 def seedTheBoard(board):
@@ -12,6 +21,8 @@ def seedTheBoard(board):
     board[2][5] = 1
     board[3][3] = 1
     board[3][4] = 1
+
+    return board
 
 # ----------------------------------------------------------------------------
 def iterateGenerations(board, timeDelay):
@@ -64,13 +75,20 @@ def testByteFxs():
               binary[2:].zfill(7))
 
 # ----------------------------------------------------------------------------
-def transmitNewBoard(board):
+def transmitNewBoard(board, serialPort):
      for row in range(1, np.shape(board)[0] - 1):
         for col in range(1, np.shape(board)[1] - 1):
             byte = convertIntToByte(val=int(board[row, col]), base="b")
             binary = convertByteToBinary(hex=byte.hex(), base=16)
 
             print(str(board[row,col]) + ": " + str(byte))
+
+            serialPort.write(byte)
+
+# ----------------------------------------------------------------------------
+def connectToBoard(port):
+    serialConnection = serial.Serial(port=port, timeout=1)
+    return serialConnection
 
 # ----------------------------------------------------------------------------
 def main():
@@ -79,18 +97,34 @@ def main():
     timeDelay = 1
     gameLoopCount = 0
 
-    board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2))
-
-    seedTheBoard(board)
+    board = initiateBoard(numbOfRows, numbOfCols, True)
     print(board)
 
-    transmitNewBoard(board)
+    serialPort = None
+    for port in comports():
+
+        if port.description != "n/a":
+            serialPort = port
+            
+
+    if serialPort != None:
+        print(serialPort.device)
+        arduino = connectToBoard(port=serialPort.device)
+    else:
+        print("Whops! No serial port XD")
+
+    if not arduino.is_open:
+        print("Whops! No serial port XD")
+
+    transmitNewBoard(board=board, serialPort=arduino)
 
     for i in range(1, gameLoopCount + 1):
         board = iterateGenerations(board, timeDelay)
         print(board)
 
-        transmitNewBoard(board)
+        transmitNewBoard(board=board, serialPort=arduino)
+
+    arduino.close()
         
 
 # ----------------------------------------------------------------------------
