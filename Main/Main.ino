@@ -5,11 +5,15 @@
 
 bool Mode = 0;
 
+const int bufferSize = 50;
 int ledBrightness = 25;
 int rowTotal = 5;
 int colTotal = 5;
 int row;
 int col;
+int serialData;
+
+byte serialBuffer[bufferSize];
 
 CRGB leds[numLEDS];
 
@@ -38,11 +42,31 @@ void LED_crawlTest(int crawlDelay = 100)
 }
 
 // ---------------------------------------------------------------------------
+void readInGameBoardValue()
+{  
+  if (Serial.available())
+  {
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    int numbOfBytes = Serial.readBytes(serialBuffer, bufferSize);
+
+    for (int i = 0; i < numbOfBytes; i++)
+    {
+      Serial.print(serialBuffer[i]);
+    }
+  }
+  // digitalWrite(LED_BUILTIN, LOW);
+}
+
+// ---------------------------------------------------------------------------
 void setup() 
 {
   if (Mode == 0)
   {
     pinMode(LED_BUILTIN, OUTPUT);
+
+    // Begin the serial comms
+    Serial.begin(9600);
   }
 
   else if (Mode == 1)
@@ -68,7 +92,8 @@ void loop()
 {
   if (Mode == 0)
   {
-    blink();
+    // blink();
+    readInGameBoardValue();
   }
 
   else if (Mode == 1)
