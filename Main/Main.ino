@@ -13,7 +13,7 @@ int row;
 int col;
 int serialData;
 
-byte serialBuffer[bufferSize];
+char serialBuffer[bufferSize];
 
 CRGB leds[numLEDS];
 
@@ -48,12 +48,18 @@ void readInGameBoardValue()
   {
     digitalWrite(LED_BUILTIN, HIGH);
 
-    int numbOfBytes = Serial.readBytes(serialBuffer, bufferSize);
+    int serialData = Serial.read();
 
+    Serial.write(serialData);
+
+    /*
+    int numbOfBytes = Serial.readBytes(serialBuffer, bufferSize);
+    
     for (int i = 0; i < numbOfBytes; i++)
     {
       Serial.print(serialBuffer[i]);
     }
+    */
   }
   // digitalWrite(LED_BUILTIN, LOW);
 }
@@ -88,12 +94,21 @@ void setup()
 }
 
 // ---------------------------------------------------------------------------
+void testSerialTx()
+{ 
+  int val = 2000;
+  byte valB = (byte) val;
+  Serial.write(val);
+  delay(1000);  
+}
+
+// ---------------------------------------------------------------------------
 void loop()
 {
   if (Mode == 0)
   {
-    // blink();
-    readInGameBoardValue();
+    testSerialTx();
+    // readInGameBoardValue();
   }
 
   else if (Mode == 1)

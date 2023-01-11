@@ -3,6 +3,7 @@ from serial.tools.list_ports import comports
 import numpy as np
 import struct
 import serial
+import time
 
 # ----------------------------------------------------------------------------
 def initiateBoard(numbOfRows, numbOfCols, seedBoard):
@@ -78,17 +79,40 @@ def testByteFxs():
 def transmitNewBoard(board, serialPort):
      for row in range(1, np.shape(board)[0] - 1):
         for col in range(1, np.shape(board)[1] - 1):
-            byte = convertIntToByte(val=int(board[row, col]), base="b")
+            byte = convertIntToByte(val=int(board[row, col]), base="i")
             binary = convertByteToBinary(hex=byte.hex(), base=16)
 
             print(str(board[row,col]) + ": " + str(byte))
 
-            serialPort.write(byte)
+            numbOfBytesSent = serialPort.write(byte)
+            print(numbOfBytesSent)
 
 # ----------------------------------------------------------------------------
 def connectToBoard(port):
     serialConnection = serial.Serial(port=port, timeout=1)
     return serialConnection
+
+# ----------------------------------------------------------------------------
+def testByteTransmitToArduino(arduino):
+    byte = convertIntToByte(1,"b")
+    print(byte)
+    sentBytes = arduino.write(byte)
+    print("Number of Transmitted Bytes: " + str(sentBytes))
+
+    time.sleep(1)
+
+    print(str(arduino.in_waiting))
+    rxBytes = arduino.read(size=16)
+    print(rxBytes)
+
+# ----------------------------------------------------------------------------
+def testByteRxFromArduin(arduino):
+    while (True):
+        print(str(arduino.in_waiting))
+        rxBytes = arduino.read(size=4)
+        print(rxBytes)
+
+        time.sleep(1)
 
 # ----------------------------------------------------------------------------
 def main():
@@ -106,17 +130,16 @@ def main():
         if port.description != "n/a":
             serialPort = port
             
-
     if serialPort != None:
         print(serialPort.device)
         arduino = connectToBoard(port=serialPort.device)
     else:
         print("Whops! No serial port XD")
 
-    if not arduino.is_open:
-        print("Whops! No serial port XD")
+    testByteRxFromArduin(arduino=arduino)
+    # testByteTransmitToArduino(arduino=arduino)
 
-    transmitNewBoard(board=board, serialPort=arduino)
+    # transmitNewBoard(board=board, serialPort=arduino)
 
     for i in range(1, gameLoopCount + 1):
         board = iterateGenerations(board, timeDelay)
