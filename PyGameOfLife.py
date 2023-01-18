@@ -88,11 +88,6 @@ def transmitNewBoard(board, serialPort):
             print(numbOfBytesSent)
 
 # ----------------------------------------------------------------------------
-def connectToBoard(port):
-    serialConnection = serial.Serial(port=port, timeout=1)
-    return serialConnection
-
-# ----------------------------------------------------------------------------
 def testByteTransmitToArduino(arduino):
     byte = convertIntToByte(1,"b")
     print(byte)
@@ -106,16 +101,42 @@ def testByteTransmitToArduino(arduino):
     print(rxBytes)
 
 # ----------------------------------------------------------------------------
-def testByteRxFromArduin(arduino):
-    while (True):
-        print(str(arduino.in_waiting))
-        rxBytes = arduino.read(size=4)
-        print(rxBytes)
+def rxByteFromArduino(arduino, byteSize):
+    rxByte = serial.Serial.read(size=byteSize)
+    print(rxByte)
 
-        time.sleep(1)
+# ----------------------------------------------------------------------------
+def listSerialPorts():
+
+    if len(comports()) == 0:
+        print("No comports to list!")
+        return
+
+    for port in comports():
+        print(port.device + ", " + port.description)
+
+# ----------------------------------------------------------------------------
+def getUSBPortObject():
+    portObject = None
+    for port in comports():
+        if port.description != "n/a":
+            portObject = port
+            break  
+    return portObject
+        
+# ----------------------------------------------------------------------------
+def getSerialObject(serialPort, timeout):   
+    if serialPort != None:
+        print(serialPort.device)
+        arduino = serial.Serial(port=serialPort.device, timeout=timeout)
+        return arduino
+    else:
+        print("Whops! No serial port XD")
+        return None
 
 # ----------------------------------------------------------------------------
 def main():
+    # Board/Game Parameters
     numbOfRows = 5
     numbOfCols = 5
     timeDelay = 1
@@ -124,31 +145,24 @@ def main():
     board = initiateBoard(numbOfRows, numbOfCols, True)
     print(board)
 
-    serialPort = None
-    for port in comports():
+    # Serial Parameters
+    timeout = 1
+    byteSizes = 8
 
-        if port.description != "n/a":
-            serialPort = port
+    listSerialPorts()
+    arduinoPort = getUSBPortObject()
+    arduino = getSerialObject(serialPort=arduinoPort, timeout=timeout)
+
+    if arduino != None:
+        rxByteFromArduino(arduino=arduino, byteSize=byteSizes)
+
+        for i in range(1, gameLoopCount + 1):
+            board = iterateGenerations(board, timeDelay)
+            print(board)
+
+            transmitNewBoard(board=board, serialPort=arduino)
             
-    if serialPort != None:
-        print(serialPort.device)
-        arduino = connectToBoard(port=serialPort.device)
-    else:
-        print("Whops! No serial port XD")
-
-    testByteRxFromArduin(arduino=arduino)
-    # testByteTransmitToArduino(arduino=arduino)
-
-    # transmitNewBoard(board=board, serialPort=arduino)
-
-    for i in range(1, gameLoopCount + 1):
-        board = iterateGenerations(board, timeDelay)
-        print(board)
-
-        transmitNewBoard(board=board, serialPort=arduino)
-
-    arduino.close()
-        
+        arduino.close()
 
 # ----------------------------------------------------------------------------
 if __name__ == "__main__":
