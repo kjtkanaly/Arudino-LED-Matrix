@@ -7,7 +7,7 @@ import time
 
 # ----------------------------------------------------------------------------
 def initiateBoard(numbOfRows, numbOfCols, seedBoard):
-    board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2))
+    board = np.zeros(shape=(numbOfRows + 2, numbOfCols + 2),dtype=int)
 
     if seedBoard:
         board = seedTheBoard(board)
@@ -135,6 +135,14 @@ def getSerialObject(serialPort, timeout):
         return None
 
 # ----------------------------------------------------------------------------
+def convertBoardToString(board):
+    output = ""
+    for row in range(1, np.shape(board)[0] - 1):
+        for col in range(1, np.shape(board)[1] - 1):
+            output += str(board[row,col])
+    return output
+
+# ----------------------------------------------------------------------------
 def main():
     # Board/Game Parameters
     numbOfRows = 5
@@ -152,6 +160,12 @@ def main():
     listSerialPorts()
     arduinoPort = getUSBPortObject()
     arduino = getSerialObject(serialPort=arduinoPort, timeout=timeout)
+
+    boardString = convertBoardToString(board)
+    print(boardString)
+
+    boardBytes = bytes(boardString, 'utf-8')
+    print(boardBytes)
 
     if arduino != None:
         rxByteFromArduino(arduino=arduino, byteSize=byteSizes)
