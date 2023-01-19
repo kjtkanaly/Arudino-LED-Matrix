@@ -102,8 +102,9 @@ def testByteTransmitToArduino(arduino):
 
 # ----------------------------------------------------------------------------
 def rxByteFromArduino(arduino, byteSize):
-    rxByte = serial.Serial.read(size=byteSize)
-    print(rxByte)
+    while True:
+        rxByte = arduino.read(size=1)
+        print(rxByte.hex() + ": " + str(int.from_bytes(rxByte)))
 
 # ----------------------------------------------------------------------------
 def listSerialPorts():

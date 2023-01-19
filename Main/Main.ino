@@ -12,6 +12,7 @@ int colTotal = 5;
 int row;
 int col;
 int serialData;
+int serialVal = 0;
 
 char serialBuffer[bufferSize];
 
@@ -96,9 +97,15 @@ void setup()
 // ---------------------------------------------------------------------------
 void testSerialTx()
 { 
-  int val = 2000;
-  byte valB = (byte) val;
-  Serial.write(val);
+  Serial.write(serialVal);
+
+  serialVal++;
+
+  if (serialVal > 10)
+  {
+    serialVal = 0;
+  }
+
   delay(1000);  
 }
 
