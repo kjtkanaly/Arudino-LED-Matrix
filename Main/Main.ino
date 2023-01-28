@@ -18,7 +18,7 @@ int numRows = 9;
 int numCols = 9;
 int numLEDS;
 // GameOfLife Parameters
-int board[0][0];
+int board[11][11];
 int livingCellHue = 0;
 int livingCellSat = 255;
 int livingCellVal = 255;
@@ -26,7 +26,7 @@ int generationTimeDelay = 1000;
 // Serial Parameters
 int serialVal = 0;
 
-CRGB leds[0];
+CRGB leds[81];
 
 // ---------------------------------------------------------------------------
 void blink()
@@ -73,9 +73,10 @@ void turnOffAllLEDS()
 // ---------------------------------------------------------------------------
 void seedGameBoard()
 {
-  // Initilize the board
-  board[numRows + 2][numCols + 2];
-  
+  board[1][1] = 1;
+  //board[9][1] = 1;
+  //board[1][9] = 1;
+
   // Assign initial cells
   board[4][5] = 1;
   board[5][5] = 1;
@@ -89,58 +90,94 @@ void seedGameBoard()
 // ---------------------------------------------------------------------------
 void iterateGenerations()
 {
-
-  int nextBoard[sizeof(board)[0]][sizeof(board)[1]];
-
-
-
+  int nextBoard[sizeof(board) / sizeof(board[0])][sizeof(board[0]) / sizeof(board[0][0])];
 
   /*
-  nextBoard = np.zeros(shape=np.shape(board))
+  Serial.print(sizeof(nextBoard) / sizeof(nextBoard[0]));
+  Serial.print(",");
+  Serial.print(sizeof(nextBoard[0]) / sizeof(nextBoard[0][0]));
+  Serial.print("\n");
+  /**/
 
-    for row in range(1, np.shape(board)[0] - 1):
-        for col in range(1, np.shape(board)[1] - 1):
-            neighborCount = np.sum(board[row - 1:row + 2,
-                                         col - 1:col + 2])
-            neighborCount -= board[row][col]
+  for (int row = 1; row <= numRows; row++)
+  {
+    for (int col = 1; col <= numCols; col++)
+    {
+      int neighborCount = 0;
 
-            # Survive
-            if (((neighborCount == 2) | (neighborCount == 3)) & 
-                 (board[row][col] == 1)):
-                nextBoard[row][col] = 1
+      // Sum the neighbors
+      for (int y = row - 1; y <= (row + 1); y++)
+      {
+        for (int x = col - 1; x <= (col + 1); x++)
+        {
+          neighborCount += board[y][x];
+        }
+      }
 
-            # Starve
-            if ((neighborCount <= 1) & (board[row][col] == 1)):
-                nextBoard[row][col] = 0
+      neighborCount -= board[row][col];
 
-            # Overpopulate
-            if ((neighborCount >= 4) & (board[row][col] == 1)):
-                nextBoard[row][col] = 0
+      Serial.print(String(neighborCount) + ": " + String(row) + "x" + String(col) + "\n");
 
-            # Create Life
-            if ((neighborCount == 3) & (board[row][col] == 0)):
-                nextBoard[row][col] = 1
-    
-    return nextBoard
-    /**/
+      // Survive
+      if (((neighborCount == 2) || (neighborCount == 3)) && (board[row][col] == 1))
+      {
+        nextBoard[row][col] = 1;
+      }
+
+      // Starve
+      if ((neighborCount <= 1) && (board[row][col] == 1))
+      {
+        nextBoard[row][col] = 0;
+      }
+
+      // Overpopulate
+      if ((neighborCount >= 4) && (board[row][col] == 1))
+      {
+        nextBoard[row][col] = 0;
+      }
+
+      //Create Life
+      if ((neighborCount == 3) && (board[row][col] == 0))
+      {
+        nextBoard[row][col] = 1;
+      }
+    }
+  }
+  
+  for (int row = 0; row < (numRows + 2); row++)
+  {
+    for (int col = 0; col < (numCols + 2); col++)
+    {
+      board[row][col] = nextBoard[row][col];
+    }
+  }
+
+  displayBoardOnMatrix();
+
+  delay(generationTimeDelay);
 }
 
 // ---------------------------------------------------------------------------
 void displayBoardOnMatrix()
 {
-  for (int row = 1; row < numRows + 2; row++)
+  for (int row = 1; row <= numRows; row++)
   {
-    for (int col = 1; col < numCols + 2; col++)
+    for (int col = 1; col <= numCols; col++)
     {
+      int index = (col - 1) * numCols + (row - 1);
+
+      //Serial.print(index);
+      //Serial.print(": " + String(row) + "x" + String(col) + "\n");
+
       if (board[row][col] == 1)
       {
-        leds[row * numRows + col] = CHSV(livingCellHue, 
-                                         livingCellSat, 
-                                         livingCellVal);
+        leds[index] = CHSV(livingCellHue, 
+                           livingCellSat, 
+                           livingCellVal);
       }
       else
       {
-        leds[row * numRows + col] = CHSV(0, 0, 0);
+        leds[index] = CHSV(0, 0, 0);
       }
     }
   }
@@ -151,10 +188,10 @@ void displayBoardOnMatrix()
 // ---------------------------------------------------------------------------
 void setup() 
 {
-  numLEDS = numRows * numCols;
+  Serial.begin(9600);
 
   // Initialize the LED matrix
-  leds[numLEDS];
+  numLEDS = numRows * numCols;
   FastLED.addLeds<WS2812B, LED_Pin, GRB>(leds,numLEDS);
   FastLED.setBrightness(ledBrightness);
 
@@ -168,7 +205,15 @@ void setup()
 
 // ---------------------------------------------------------------------------
 void loop()
-{
+{  
+  /*
+  Serial.print(sizeof(board) / sizeof(board[0]));
+  Serial.print(",");
+  Serial.print(sizeof(board[0]) / sizeof(board[0][0]));
+  Serial.print("\n");
+  delay(1000);
+  /**/
+
   switch (matrixMode)
   {
     case (MatrixMode::fillBoardRB):
@@ -178,7 +223,8 @@ void loop()
       LED_crawlTest();
       break;
     case (MatrixMode::gameOfLife):
-      iterateGenerations();
+      //iterateGenerations();
+      matrixMode = 3;
       break;
-  }
+  }/**/
 }
