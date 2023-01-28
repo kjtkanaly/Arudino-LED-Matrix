@@ -73,24 +73,47 @@ void turnOffAllLEDS()
 // ---------------------------------------------------------------------------
 void seedGameBoard()
 {
+  // Set Next Board to zero initially
+  for (int row = 0; row < numRows + 2; row++)
+  {
+    for (int col = 0; col < numCols + 2; col++)
+    {
+      board[row][col] = 0;
+    }
+  }
+
   board[1][1] = 1;
   //board[9][1] = 1;
   //board[1][9] = 1;
 
   // Assign initial cells
+  board[2][5] = 1;
+  board[3][5] = 1;
   board[4][5] = 1;
   board[5][5] = 1;
+  board[6][5] = 1;
   board[6][6] = 1;
   board[7][7] = 1;
 
   // Display the board on the matrix
   displayBoardOnMatrix();
+
+  delay(generationTimeDelay);
 }
 
 // ---------------------------------------------------------------------------
 void iterateGenerations()
 {
   int nextBoard[sizeof(board) / sizeof(board[0])][sizeof(board[0]) / sizeof(board[0][0])];
+
+  // Set Next Board to zero initially
+  for (int row = 0; row < numRows + 2; row++)
+  {
+    for (int col = 0; col < numCols + 2; col++)
+    {
+      nextBoard[row][col] = 0;
+    }
+  }
 
   /*
   Serial.print(sizeof(nextBoard) / sizeof(nextBoard[0]));
@@ -116,7 +139,7 @@ void iterateGenerations()
 
       neighborCount -= board[row][col];
 
-      Serial.print(String(neighborCount) + ": " + String(row) + "x" + String(col) + "\n");
+      //Serial.print(String(neighborCount) + ": " + String(row) + "x" + String(col) + "\n");
 
       // Survive
       if (((neighborCount == 2) || (neighborCount == 3)) && (board[row][col] == 1))
@@ -141,6 +164,8 @@ void iterateGenerations()
       {
         nextBoard[row][col] = 1;
       }
+
+      // Serial.print(String(neighborCount) + ": " + String(row) + "x" + String(col) + "=" + String(nextBoard[row][col]) + "\n");
     }
   }
   
@@ -223,8 +248,8 @@ void loop()
       LED_crawlTest();
       break;
     case (MatrixMode::gameOfLife):
-      //iterateGenerations();
-      matrixMode = 3;
+      iterateGenerations();
+      // matrixMode = 3;
       break;
   }/**/
 }
