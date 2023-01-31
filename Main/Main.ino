@@ -87,13 +87,16 @@ void seedGameBoard()
   //board[1][9] = 1;
 
   // Assign initial cells
-  board[2][5] = 1;
-  board[3][5] = 1;
+  board[4][4] = 1;
   board[4][5] = 1;
-  board[5][5] = 1;
+  board[4][6] = 1;
+
+  board[6][4] = 1;
   board[6][5] = 1;
   board[6][6] = 1;
-  board[7][7] = 1;
+
+  board[5][4] = 1;
+  board[5][6] = 1;
 
   // Display the board on the matrix
   displayBoardOnMatrix();
